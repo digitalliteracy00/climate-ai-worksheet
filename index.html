@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기후 위기를 구하는 AI 개발 활동지</title>
+<style>
+  :root{
+    --bg:#f2f8f1; --card:#ffffff; --ink:#1f3a2b; --sub:#4d6b5a;
+    --green:#2e8b57; --green-d:#1f6b41; --leaf:#d8efdc; --sky:#dff1fb; --sun:#fff1c9;
+    --line:#b9d6c2; --warn:#c0392b;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"HancomMalangMalang","한컴 말랑말랑","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    font-size:25pt; line-height:1.55;
+  }
+  header{
+    background:linear-gradient(135deg,#2e8b57,#3aa6a0); color:#fff;
+    padding:18px 24px 14px;
+  }
+  header h1{margin:0 0 8px; font-size:34pt; line-height:1.25}
+  .who{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+  .who label{display:flex; align-items:center; gap:10px; font-size:25pt}
+  .who input{
+    font:inherit; font-size:25pt; padding:6px 14px; border-radius:14px; border:3px solid #fff;
+    background:#fff; color:var(--ink); width:9em; min-height:56px;
+  }
+  .who input.short{width:5.5em}
+
+  nav{
+    position:sticky; top:0; z-index:5; background:#fff; border-bottom:4px solid var(--leaf);
+    padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  }
+  nav button{
+    font:inherit; font-size:25pt; min-height:60px; padding:4px 18px; border-radius:30px;
+    border:3px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+  }
+  nav button.cur{background:var(--green); border-color:var(--green-d); color:#fff}
+  nav button.done::after{content:" ✔"; color:var(--green)}
+  nav button.cur.done::after{color:#fff}
+  .bar{flex:1 1 100%; height:16px; background:var(--leaf); border-radius:10px; overflow:hidden}
+  .bar i{display:block; height:100%; width:0; background:var(--green); transition:width .3s}
+
+  main{max-width:1280px; margin:0 auto; padding:20px 20px 40px}
+  .page{display:none}
+  .page.show{display:block}
+  .page > h2{font-size:32pt; margin:6px 0 4px}
+  .lead{background:var(--sun); border-radius:18px; padding:12px 20px; margin:0 0 18px; font-size:25pt}
+  .q{background:var(--card); border:3px solid var(--line); border-radius:22px; padding:16px 22px; margin-bottom:18px}
+  .ql{font-weight:700; font-size:27pt; margin:0 0 4px}
+  .hint{color:var(--sub); font-size:25pt; margin:0 0 10px}
+  textarea,input[type=text]{
+    font:inherit; font-size:25pt; width:100%; padding:10px 16px; border:3px solid var(--line);
+    border-radius:16px; background:#fcfffc; color:var(--ink); line-height:1.5;
+  }
+  textarea{min-height:130px; resize:vertical; overflow:hidden}
+  textarea:focus,input:focus,button:focus-visible{outline:4px solid #f4b400; outline-offset:2px}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin:6px 0 10px}
+  .chip{
+    display:inline-flex; align-items:center; gap:8px; min-height:60px; padding:4px 20px;
+    border:3px solid var(--line); border-radius:32px; background:#fff; cursor:pointer; user-select:none;
+  }
+  .chip input{width:30px; height:30px; margin:0; accent-color:var(--green)}
+  .chip.on{background:var(--leaf); border-color:var(--green)}
+  .flow{display:flex; flex-wrap:wrap; gap:14px; align-items:stretch}
+  .flow .box{flex:1 1 300px; border-radius:22px; padding:14px 18px; border:3px solid var(--line)}
+  .flow .box.in{background:var(--sky)}
+  .flow .box.learn{background:var(--sun)}
+  .flow .box.out{background:var(--leaf)}
+  .flow .arrow{align-self:center; font-size:36pt; color:var(--green-d)}
+  .rule{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px}
+  .rule b{font-size:27pt}
+  .rule input{flex:1 1 280px}
+  .card2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media (max-width:900px){.card2{grid-template-columns:1fr}}
+  .nums{display:flex; gap:12px; margin:22px 0 10px}
+  .btn{
+    font:inherit; font-size:25pt; min-height:68px; padding:6px 30px; border-radius:34px;
+    border:none; background:var(--green); color:#fff; cursor:pointer; font-weight:700;
+  }
+  .btn.alt{background:#fff; color:var(--green-d); border:3px solid var(--green)}
+  .btn.warn{background:#fff; color:var(--warn); border:3px solid var(--warn)}
+  .btn[disabled]{opacity:.35; cursor:default}
+  .row{display:flex; flex-wrap:wrap; gap:12px; margin-top:8px}
+  .spacer{flex:1}
+  #msg{min-height:1.6em; color:var(--green-d); font-weight:700; margin-top:10px}
+  .note{color:var(--sub); font-size:25pt; margin-top:16px}
+
+  @media print{
+    @page{margin:12mm}
+    body{font-size:11pt; background:#fff}
+    header{background:#fff; color:#000; padding:0 0 6px; border-bottom:2px solid #000}
+    header h1{font-size:18pt}
+    .who label,.who input{font-size:11pt; min-height:0; border:none; border-bottom:1px solid #000; border-radius:0; background:none; color:#000}
+    nav,.nums,.actions,#msg,.note,.hint{display:none !important}
+    .page{display:block !important; page-break-inside:avoid; margin-bottom:10px}
+    .page > h2{font-size:14pt}
+    .lead{font-size:10pt; padding:4px 10px}
+    .q{padding:6px 12px; margin-bottom:6px; border:1px solid #888}
+    .ql{font-size:11pt}
+    textarea,input[type=text]{font-size:11pt; padding:2px 6px; border:1px solid #bbb; min-height:0}
+    .chip{font-size:10pt; min-height:0; padding:0 8px; border:1px solid #aaa}
+    .chip input{width:14px; height:14px}
+    .chip:not(.on){display:none}
+    .btn{display:none}
+    .flow .arrow{font-size:16pt}
+    .flow .box{padding:6px 10px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌍 기후 위기를 구하는 AI 개발 활동지</h1>
+  <div class="who">
+    <label>학년·반 <input type="text" class="short" data-k="grade" aria-label="학년 반" autocomplete="off"></label>
+    <label>이름 <input type="text" data-k="name" aria-label="이름" autocomplete="off"></label>
+    <label>모둠 <input type="text" class="short" data-k="team" aria-label="모둠" autocomplete="off"></label>
+  </div>
+</header>
+
+<nav aria-label="활동 단계">
+  <span id="steps" style="display:contents"></span>
+  <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+</nav>
+
+<main>
+
+<!-- 1 -->
+<section class="page" data-title="① 문제 찾기">
+  <h2>① 어떤 문제가 있을까요? 🔍</h2>
+  <p class="lead">기후 위기 때문에 우리 주변에서 생기는 문제를 찾아봐요.</p>
+
+  <div class="q">
+    <p class="ql">기후 위기로 어떤 문제가 생기고 있나요? (여러 개 선택)</p>
+    <div class="chips" data-group="문제 선택">
+      <label class="chip"><input type="checkbox" data-k="p1" value="폭염과 폭우"> 폭염과 폭우</label>
+      <label class="chip"><input type="checkbox" data-k="p2" value="쓰레기 증가"> 쓰레기 증가</label>
+      <label class="chip"><input type="checkbox" data-k="p3" value="전기·에너지 낭비"> 전기·에너지 낭비</label>
+      <label class="chip"><input type="checkbox" data-k="p4" value="미세먼지·대기오염"> 미세먼지·대기오염</label>
+      <label class="chip"><input type="checkbox" data-k="p5" value="바다·빙하 변화"> 바다·빙하 변화</label>
+      <label class="chip"><input type="checkbox" data-k="p6" value="산불과 가뭄"> 산불과 가뭄</label>
+      <label class="chip"><input type="checkbox" data-k="p7" value="음식물 낭비"> 음식물 낭비</label>
+      <label class="chip"><input type="checkbox" data-k="p8" value="동물 서식지 파괴"> 동물 서식지 파괴</label>
+    </div>
+    <input type="text" data-k="p_other" data-label="다른 문제" placeholder="그 밖에 내가 찾은 문제" aria-label="그 밖에 찾은 문제">
+  </div>
+
+  <div class="q">
+    <p class="ql">내가 가장 해결하고 싶은 문제는?</p>
+    <textarea data-k="main_problem" data-label="가장 해결하고 싶은 문제" aria-label="가장 해결하고 싶은 문제"></textarea>
+  </div>
+
+  <div class="q">
+    <p class="ql">왜 그 문제를 골랐나요?</p>
+    <p class="hint">내가 직접 본 일이나 느낀 점을 써 보세요.</p>
+    <textarea data-k="why_problem" data-label="문제를 고른 이유" aria-label="문제를 고른 이유"></textarea>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="page" data-title="② AI 아이디어">
+  <h2>② 어떤 AI가 필요할까요? 💡</h2>
+  <p class="lead">내가 고른 문제를 도와줄 AI를 상상해 봐요.</p>
+
+  <div class="q">
+    <p class="ql">내 AI의 이름은?</p>
+    <input type="text" data-k="ai_name" data-label="AI 이름" aria-label="AI 이름" placeholder="예) 분리배출 도우미">
+  </div>
+
+  <div class="q">
+    <p class="ql">이 AI는 무엇을 도와주나요?</p>
+    <p class="hint">“이 AI는 ( ) 을(를) 도와주는 AI입니다.” 문장으로 써 보세요.</p>
+    <textarea data-k="ai_what" data-label="AI가 하는 일" aria-label="AI가 하는 일"></textarea>
+  </div>
+
+  <div class="q">
+    <p class="ql">누가 이 AI를 쓰나요? (여러 개 선택)</p>
+    <div class="chips" data-group="사용자">
+      <label class="chip"><input type="checkbox" data-k="u1" value="학생"> 학생</label>
+      <label class="chip"><input type="checkbox" data-k="u2" value="우리 가족"> 우리 가족</label>
+      <label class="chip"><input type="checkbox" data-k="u3" value="학교"> 학교</label>
+      <label class="chip"><input type="checkbox" data-k="u4" value="우리 동네"> 우리 동네</label>
+      <label class="chip"><input type="checkbox" data-k="u5" value="공장·회사"> 공장·회사</label>
+      <label class="chip"><input type="checkbox" data-k="u6" value="농부"> 농부</label>
+      <label class="chip"><input type="checkbox" data-k="u7" value="소방관·구조대"> 소방관·구조대</label>
+    </div>
+    <input type="text" data-k="u_other" data-label="다른 사용자" placeholder="그 밖의 사용자" aria-label="그 밖의 사용자">
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="page" data-title="③ AI 설계도">
+  <h2>③ AI 설계도 그리기 🧠</h2>
+  <p class="lead">AI는 <b>보고(입력)</b> → <b>배우고(학습)</b> → <b>알려줘요(출력)</b>. 내 AI는 어떻게 일할까요?</p>
+
+  <div class="flow">
+    <div class="box in">
+      <p class="ql">👀 입력</p>
+      <p class="hint">AI가 무엇을 보고, 듣고, 읽나요?</p>
+      <textarea data-k="d_in" data-label="입력" aria-label="입력"></textarea>
+    </div>
+    <div class="arrow" aria-hidden="true">➜</div>
+    <div class="box learn">
+      <p class="ql">📚 학습</p>
+      <p class="hint">어떤 자료로 공부해야 할까요?</p>
+      <textarea data-k="d_learn" data-label="학습 자료" aria-label="학습 자료"></textarea>
+    </div>
+    <div class="arrow" aria-hidden="true">➜</div>
+    <div class="box out">
+      <p class="ql">📢 출력</p>
+      <p class="hint">AI가 어떤 답이나 행동을 하나요?</p>
+      <textarea data-k="d_out" data-label="출력" aria-label="출력"></textarea>
+    </div>
+  </div>
+
+  <div class="q" style="margin-top:18px">
+    <p class="ql">AI가 공부할 자료(데이터) 예를 3가지 써 보세요.</p>
+    <p class="hint">예) 플라스틱병 사진 100장, 우리 학교 하루 전기 사용량 숫자</p>
+    <textarea data-k="d_examples" data-label="데이터 예시" aria-label="데이터 예시"></textarea>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="page" data-title="④ 규칙·시험">
+  <h2>④ 내 AI 만들고 시험하기 📋</h2>
+  <p class="lead">AI가 판단하는 규칙을 만들고, 잘 되는지 시험해 봐요.</p>
+
+  <div class="q">
+    <p class="ql">AI의 판단 규칙 3개 만들기</p>
+    <p class="hint">“만약 ( ) 이면, AI는 ( ) 한다” 모양으로 써요.</p>
+    <div class="rule"><b>① 만약</b><input type="text" data-k="r1_if" data-label="규칙1 조건" aria-label="규칙1 조건"><b>이면, AI는</b><input type="text" data-k="r1_then" data-label="규칙1 행동" aria-label="규칙1 행동"></div>
+    <div class="rule"><b>② 만약</b><input type="text" data-k="r2_if" data-label="규칙2 조건" aria-label="규칙2 조건"><b>이면, AI는</b><input type="text" data-k="r2_then" data-label="규칙2 행동" aria-label="규칙2 행동"></div>
+    <div class="rule"><b>③ 만약</b><input type="text" data-k="r3_if" data-label="규칙3 조건" aria-label="규칙3 조건"><b>이면, AI는</b><input type="text" data-k="r3_then" data-label="규칙3 행동" aria-label="규칙3 행동"></div>
+  </div>
+
+  <div class="card2">
+    <div class="q">
+      <p class="ql">🧪 시험 상황 1</p>
+      <textarea data-k="t1_case" data-label="시험1 상황" aria-label="시험 상황 1" placeholder="어떤 상황인가요?"></textarea>
+      <textarea data-k="t1_ai" data-label="시험1 AI 반응" aria-label="시험 1 AI 반응" placeholder="내 AI는 어떻게 할까요?" style="margin-top:8px"></textarea>
+      <div class="chips" data-group="시험1 결과">
+        <label class="chip"><input type="radio" name="t1" data-k="t1_res" value="잘 맞았어요"> ⭕ 잘 맞았어요</label>
+        <label class="chip"><input type="radio" name="t1" data-k="t1_res" value="조금 아쉬워요"> 🔺 조금 아쉬워요</label>
+        <label class="chip"><input type="radio" name="t1" data-k="t1_res" value="고쳐야 해요"> ❌ 고쳐야 해요</label>
+      </div>
+      <input type="text" data-k="t1_fix" data-label="시험1 고칠 점" placeholder="고칠 점" aria-label="시험 1 고칠 점">
+    </div>
+    <div class="q">
+      <p class="ql">🧪 시험 상황 2</p>
+      <textarea data-k="t2_case" data-label="시험2 상황" aria-label="시험 상황 2" placeholder="어떤 상황인가요?"></textarea>
+      <textarea data-k="t2_ai" data-label="시험2 AI 반응" aria-label="시험 2 AI 반응" placeholder="내 AI는 어떻게 할까요?" style="margin-top:8px"></textarea>
+      <div class="chips" data-group="시험2 결과">
+        <label class="chip"><input type="radio" name="t2" data-k="t2_res" value="잘 맞았어요"> ⭕ 잘 맞았어요</label>
+        <label class="chip"><input type="radio" name="t2" data-k="t2_res" value="조금 아쉬워요"> 🔺 조금 아쉬워요</label>
+        <label class="chip"><input type="radio" name="t2" data-k="t2_res" value="고쳐야 해요"> ❌ 고쳐야 해요</label>
+      </div>
+      <input type="text" data-k="t2_fix" data-label="시험2 고칠 점" placeholder="고칠 점" aria-label="시험 2 고칠 점">
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="page" data-title="⑤ 생각해 보기">
+  <h2>⑤ 우리 AI, 괜찮을까요? ⚖️</h2>
+  <p class="lead">AI도 전기를 쓰고, 틀릴 수도 있어요. 좋은 점과 조심할 점을 함께 생각해 봐요.</p>
+
+  <div class="q">
+    <p class="ql">😊 내 AI가 지구에 주는 좋은 점</p>
+    <textarea data-k="e_good" data-label="좋은 점" aria-label="좋은 점"></textarea>
+  </div>
+  <div class="q">
+    <p class="ql">😟 걱정되거나 조심해야 할 점</p>
+    <p class="hint">예) AI가 전기를 많이 쓸 수 있어요. AI가 틀린 판단을 할 수도 있어요.</p>
+    <textarea data-k="e_bad" data-label="걱정되는 점" aria-label="걱정되는 점"></textarea>
+  </div>
+  <div class="q">
+    <p class="ql">🙋 AI가 못 하고, 사람이 꼭 해야 할 일은?</p>
+    <textarea data-k="e_human" data-label="사람이 해야 할 일" aria-label="사람이 해야 할 일"></textarea>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="page" data-title="⑥ 발표·소감">
+  <h2>⑥ 발표 준비와 소감 🎤</h2>
+  <p class="lead">내 AI를 친구들에게 소개해요.</p>
+
+  <div class="q">
+    <p class="ql">📣 내 AI를 한 줄로 홍보해 보세요!</p>
+    <textarea data-k="pitch" data-label="한 줄 홍보 문구" aria-label="한 줄 홍보 문구" style="min-height:90px"></textarea>
+  </div>
+
+  <div class="q">
+    <p class="ql">오늘 수업을 돌아봐요</p>
+    <p class="ql" style="font-weight:400">AI가 어떻게 일하는지 이해했나요?</p>
+    <div class="chips" data-group="이해도">
+      <label class="chip"><input type="radio" name="s1" data-k="s1" value="😊 잘 이해했어요"> 😊 잘 이해했어요</label>
+      <label class="chip"><input type="radio" name="s1" data-k="s1" value="🙂 조금 이해했어요"> 🙂 조금 이해했어요</label>
+      <label class="chip"><input type="radio" name="s1" data-k="s1" value="🤔 더 알고 싶어요"> 🤔 더 알고 싶어요</label>
+    </div>
+    <p class="ql" style="font-weight:400">모둠 활동에 열심히 참여했나요?</p>
+    <div class="chips" data-group="참여도">
+      <label class="chip"><input type="radio" name="s2" data-k="s2" value="😊 매우 열심히"> 😊 매우 열심히</label>
+      <label class="chip"><input type="radio" name="s2" data-k="s2" value="🙂 보통"> 🙂 보통</label>
+      <label class="chip"><input type="radio" name="s2" data-k="s2" value="🤔 더 노력할래요"> 🤔 더 노력할래요</label>
+    </div>
+  </div>
+
+  <div class="q">
+    <p class="ql">오늘 배운 점과 앞으로 내가 실천할 일</p>
+    <textarea data-k="reflect" data-label="배운 점과 실천" aria-label="배운 점과 실천"></textarea>
+  </div>
+
+  <div class="q actions">
+    <p class="ql">📁 활동지 저장하기</p>
+    <div class="row">
+      <button class="btn" id="btnPrint" type="button">🖨️ 인쇄 / PDF로 저장</button>
+      <button class="btn alt" id="btnTxt" type="button">📄 글 파일로 저장</button>
+      <button class="btn alt" id="btnCopy" type="button">📋 전체 복사</button>
+      <span class="spacer"></span>
+      <button class="btn warn" id="btnReset" type="button">🗑️ 처음부터 다시</button>
+    </div>
+    <div id="msg" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<div class="nums">
+  <button class="btn alt" id="prev" type="button">◀ 이전</button>
+  <span class="spacer"></span>
+  <button class="btn" id="next" type="button">다음 ▶</button>
+</div>
+<p class="note">✍️ 쓴 내용은 이 기기에 자동으로 저장돼요. 창을 닫았다가 다시 열어도 남아 있어요.</p>
+
+</main>
+
+<script>
+(function(){
+  var KEY = 'climate-ai-worksheet-v1';
+  var state = {};
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var fields = Array.prototype.slice.call(document.querySelectorAll('[data-k]'));
+  var cur = 0;
+
+  function load(){
+    try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e){ state = {}; }
+  }
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+  }
+  function collect(){
+    state = {};
+    fields.forEach(function(el){
+      var k = el.dataset.k;
+      if (el.type === 'checkbox') { if (el.checked) state[k] = true; }
+      else if (el.type === 'radio') { if (el.checked) state[k] = el.value; }
+      else if (el.value !== '') { state[k] = el.value; }
+    });
+  }
+  function apply(){
+    fields.forEach(function(el){
+      var k = el.dataset.k, v = state[k];
+      if (el.type === 'checkbox') el.checked = !!v;
+      else if (el.type === 'radio') el.checked = (v === el.value);
+      else el.value = (v == null ? '' : v);
+    });
+    syncChips(); fitAll();
+  }
+  function syncChips(){
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(c){
+      var i = c.querySelector('input');
+      c.classList.toggle('on', !!(i && i.checked));
+    });
+  }
+  function fit(t){ t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight + 4, 90) + 'px'; }
+  function fitAll(){ Array.prototype.forEach.call(document.querySelectorAll('textarea'), fit); }
+
+  function pageDone(i){
+    return Array.prototype.some.call(pages[i].querySelectorAll('[data-k]'), function(el){
+      if (el.type === 'checkbox' || el.type === 'radio') return el.checked;
+      return el.value.trim() !== '';
+    });
+  }
+  var stepBtns = [];
+  function buildSteps(){
+    var wrap = document.getElementById('steps');
+    pages.forEach(function(p, i){
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = p.dataset.title;
+      b.addEventListener('click', function(){ show(i); });
+      wrap.appendChild(b); stepBtns.push(b);
+    });
+  }
+  function refresh(){
+    var done = 0;
+    pages.forEach(function(p, i){
+      var d = pageDone(i); if (d) done++;
+      stepBtns[i].classList.toggle('done', d);
+      stepBtns[i].classList.toggle('cur', i === cur);
+    });
+    document.getElementById('barfill').style.width = Math.round(done / pages.length * 100) + '%';
+  }
+  function show(i){
+    cur = Math.max(0, Math.min(pages.length - 1, i));
+    pages.forEach(function(p, j){ p.classList.toggle('show', j === cur); });
+    document.getElementById('prev').disabled = (cur === 0);
+    document.getElementById('next').disabled = (cur === pages.length - 1);
+    fitAll(); refresh();
+    window.scrollTo(0, 0);
+  }
+
+  function onInput(e){
+    var el = e.target;
+    if (!el.matches || !el.matches('[data-k]')) return;
+    if (el.tagName === 'TEXTAREA') fit(el);
+    syncChips(); collect(); save(); refresh();
+  }
+  document.addEventListener('input', onInput);
+  document.addEventListener('change', onInput);
+
+  document.getElementById('prev').addEventListener('click', function(){ show(cur - 1); });
+  document.getElementById('next').addEventListener('click', function(){ show(cur + 1); });
+
+  function say(t){
+    var m = document.getElementById('msg'); m.textContent = t;
+    setTimeout(function(){ if (m.textContent === t) m.textContent = ''; }, 4000);
+  }
+
+  function buildText(){
+    var out = [];
+    out.push('기후 위기를 구하는 AI 개발 활동지');
+    out.push('학년·반: ' + (state.grade || '') + ' / 이름: ' + (state.name || '') + ' / 모둠: ' + (state.team || ''));
+    pages.forEach(function(p){
+      out.push('');
+      out.push('■ ' + p.querySelector('h2').textContent.replace(/\s+$/,''));
+      Array.prototype.forEach.call(p.querySelectorAll('.q, .flow .box'), function(q){
+        if (q.classList.contains('actions')) return;
+        var titleEl = q.querySelector('.ql');
+        var title = titleEl ? titleEl.textContent.trim() : '';
+        var lines = [];
+        Array.prototype.forEach.call(q.querySelectorAll('.chips'), function(g){
+          var picked = [];
+          Array.prototype.forEach.call(g.querySelectorAll('input'), function(i){
+            if (i.checked) picked.push(i.value);
+          });
+          if (picked.length) lines.push('  - ' + (g.dataset.group || '선택') + ': ' + picked.join(', '));
+        });
+        Array.prototype.forEach.call(q.querySelectorAll('textarea, input[type=text]'), function(i){
+          if (i.value.trim()) lines.push('  - ' + (i.dataset.label ? i.dataset.label + ': ' : '') + i.value.trim());
+        });
+        if (lines.length) { out.push('[' + title + ']'); out = out.concat(lines); }
+      });
+    });
+    return out.join('\n');
+  }
+
+  document.getElementById('btnPrint').addEventListener('click', function(){
+    fitAll();
+    try { window.print(); } catch(e){ say('이 화면에서는 인쇄가 안 돼요. 브라우저 메뉴에서 인쇄를 눌러 주세요.'); }
+  });
+  document.getElementById('btnTxt').addEventListener('click', function(){
+    try {
+      var blob = new Blob(['\uFEFF' + buildText()], {type:'text/plain;charset=utf-8'});
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '기후AI활동지_' + ((state.name || '이름없음').replace(/[\\/:*?"<>|]/g,'')) + '.txt';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      say('글 파일로 저장했어요!');
+    } catch(e){ say('저장이 안 돼요. 전체 복사를 눌러 붙여 넣어 주세요.'); }
+  });
+  document.getElementById('btnCopy').addEventListener('click', function(){
+    var text = buildText();
+    function fallback(){
+      var t = document.createElement('textarea');
+      t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+      document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(t);
+      say(ok ? '복사했어요! 원하는 곳에 붙여 넣으세요.' : '복사가 안 돼요. 글 파일로 저장을 눌러 주세요.');
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ say('복사했어요! 원하는 곳에 붙여 넣으세요.'); }, fallback);
+    } else { fallback(); }
+  });
+
+  var resetArmed = false, resetTimer = null;
+  var rb = document.getElementById('btnReset');
+  rb.addEventListener('click', function(){
+    if (!resetArmed) {
+      resetArmed = true; rb.textContent = '⚠️ 모두 지워져요! 한 번 더 누르세요';
+      resetTimer = setTimeout(function(){ resetArmed = false; rb.textContent = '🗑️ 처음부터 다시'; }, 5000);
+      return;
+    }
+    clearTimeout(resetTimer); resetArmed = false; rb.textContent = '🗑️ 처음부터 다시';
+    state = {}; save(); apply(); show(0); say('모두 지웠어요.');
+  });
+
+  window.addEventListener('beforeprint', fitAll);
+  window.addEventListener('resize', fitAll);
+
+  load(); buildSteps(); apply(); show(0);
+})();
+</script>
+</body>
+</html>
